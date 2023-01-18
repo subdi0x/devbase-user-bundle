@@ -21,6 +21,16 @@ class UserChecker implements UserCheckerInterface
         }
 
         if (!$user->isEnabled()) {
+            $exception = new DisabledException('DISABLED');
+            if ( $user instanceof User && $user->getConfirmationToken() ) {
+                $exception = new DisabledException('DISABLED:' . Strings::base64EncodeUrl($user->getEmail()));
+            }
+
+            $exception->setUser($user);
+            throw $exception;
+        }
+
+        if (!$user->isEnabled()) {
             $exception = new DisabledException('Your account has been disabled by an administrator');
             $exception->setUser($user);
             throw $exception;
@@ -30,7 +40,7 @@ class UserChecker implements UserCheckerInterface
     /**
      * @return void
      */
-    public function checkPostAuth(UserInterface $user)
+        public function checkPostAuth(UserInterface $user)
     {
     }
 }
